@@ -23,7 +23,7 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState(
     dayjs().format('YYYY-MM-DD')
   );
-  const [darkMode, setDarkMode] = useState(true); // default to dark mode
+  const [darkMode, setDarkMode] = useState(true);
   const hasShownRestoreToast = useRef(false);
 
   useEffect(() => {
@@ -99,7 +99,7 @@ export default function App() {
     : null;
 
   const exportCSV = () => {
-    if (breaks.length === 0) return; // safety check
+    if (breaks.length === 0) return;
     const csv = Papa.unparse(
       breaks.map((b) => ({
         Date: b.date,
@@ -126,15 +126,15 @@ export default function App() {
     >
       <Toaster />
 
-      <div className="max-w-4xl mx-auto flex flex-col gap-6">
+      <div className="max-w-6xl mx-auto flex flex-col gap-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <h1 className="text-2xl font-bold">🕒 Work Timer</h1>
           <div className="flex gap-2">
             <button
               onClick={() => exportCSV()}
               disabled={breaks.length === 0}
-              className={`px-4 py-2 rounded cursor-pointer ${
+              className={`px-4 py-2 rounded cursor-pointer whitespace-nowrap ${
                 breaks.length === 0
                   ? 'bg-gray-400 cursor-not-allowed text-gray-700'
                   : darkMode
@@ -146,7 +146,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className={`px-4 py-2 rounded cursor-pointer ${
+              className={`px-4 py-2 rounded cursor-pointer whitespace-nowrap ${
                 darkMode
                   ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-500'
                   : 'bg-gray-800 text-white hover:bg-gray-900'
@@ -159,12 +159,12 @@ export default function App() {
         </div>
 
         {/* Inputs */}
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className={`p-2 border rounded ${
+            className={`p-2 border rounded w-full ${
               darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
             }`}
           />
@@ -174,7 +174,7 @@ export default function App() {
             value={clockIn}
             onChange={(e) => setClockIn(e.target.value)}
             placeholder="Clock-in Time"
-            className={`p-2 border rounded ${
+            className={`p-2 border rounded w-full ${
               darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
             }`}
           />
@@ -184,7 +184,7 @@ export default function App() {
             value={shiftLength}
             onChange={(e) => setShiftLength(Number(e.target.value))}
             placeholder="Shift Length (hrs)"
-            className={`p-2 border rounded ${
+            className={`p-2 border rounded w-full ${
               darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
             }`}
           />
@@ -198,7 +198,7 @@ export default function App() {
             value={breakStart}
             onChange={(e) => setBreakStart(e.target.value)}
             placeholder="Break Start"
-            className={`p-2 border rounded ${
+            className={`p-2 border rounded w-full ${
               darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
             }`}
           />
@@ -208,13 +208,13 @@ export default function App() {
             value={breakEnd}
             onChange={(e) => setBreakEnd(e.target.value)}
             placeholder="Break End"
-            className={`p-2 border rounded ${
+            className={`p-2 border rounded w-full ${
               darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
             }`}
           />
           <button
             onClick={handleAddBreak}
-            className={`px-4 py-2 rounded cursor-pointer ${
+            className={`px-4 py-2 rounded cursor-pointer w-full ${
               darkMode
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-blue-500 text-white hover:bg-blue-600'
