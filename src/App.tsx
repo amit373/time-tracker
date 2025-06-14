@@ -18,6 +18,7 @@ export default function App() {
   const [breakStart, setBreakStart] = useState('');
   const [breakEnd, setBreakEnd] = useState('');
   const [darkMode, setDarkMode] = useState(true);
+  const [manualClockIn, setManualClockIn] = useState('');
   const selectedDate = dayjs().format('YYYY-MM-DD');
   const hasShownRestoreToast = useRef(false);
 
@@ -25,9 +26,9 @@ export default function App() {
     const stored = localStorage.getItem('work-tracker');
     if (stored && !hasShownRestoreToast.current) {
       const parsed = JSON.parse(stored);
-      setClockIn(parsed.clockIn || '');
-      setShiftLength(parsed.shiftLength || 9);
-      setBreaks(parsed.breaks || []);
+      setClockIn(parsed.clockIn ?? '');
+      setShiftLength(parsed.shiftLength ?? 9);
+      setBreaks(parsed.breaks ?? []);
       setDarkMode(parsed.darkMode ?? true);
       toast.success('🔁 Data restored');
       hasShownRestoreToast.current = true;
@@ -78,12 +79,13 @@ export default function App() {
     setBreaks([]);
     setBreakStart('');
     setBreakEnd('');
+    setManualClockIn('');
     toast.success('🔁 Reset complete');
   };
 
   const getGrossMinutes = () => {
     if (!clockIn) return 0;
-    const start = dayjs(`${selectedDate}T${clockIn}`);
+    const start = dayjs(clockIn);
     const now = dayjs();
     return Math.max(0, now.diff(start, 'minute'));
   };
@@ -92,9 +94,23 @@ export default function App() {
     const gross = getGrossMinutes();
     const totalBreak = breaks
       .filter((b) => b.date === selectedDate)
-      .reduce((acc, b) => acc + (b.duration || 0), 0);
+      .reduce((acc, b) => acc + (b.duration ?? 0), 0);
     const lunchBreak = 60; // fixed 1 hour lunch
     return Math.max(0, gross - totalBreak - lunchBreak);
+  };
+
+  const handleClockToggle = () => {
+    if (clockIn) {
+      setClockIn('');
+      toast.success('🛑 Clocked out');
+    } else {
+      const now = manualClockIn
+        ? dayjs(`${selectedDate}T${manualClockIn}`).toISOString()
+        : dayjs().toISOString();
+      setClockIn(now);
+      setManualClockIn('');
+      toast.success('✅ Clocked in');
+    }
   };
 
   const gross = getGrossMinutes();
@@ -103,13 +119,12 @@ export default function App() {
   const remaining = worked < shiftMinutes ? shiftMinutes - worked : 0;
   const overtime = worked > shiftMinutes ? worked - shiftMinutes : 0;
 
+  const totalBreak = breaks.reduce((acc, b) => acc + (b.duration ?? 0), 0);
+  const lunch = 0;
+  const assumedLunch = breaks.length === 0 ? lunch : 0;
+
   const expectedEnd = clockIn
-    ? dayjs(`${selectedDate}T${clockIn}`).add(
-        shiftMinutes +
-          breaks.reduce((acc, b) => acc + (b.duration || 0), 0) +
-          60, // + 60 mins lunch
-        'minute'
-      )
+    ? dayjs(clockIn).add(shiftMinutes + totalBreak + assumedLunch, 'minute')
     : null;
 
   const exportCSV = () => {
@@ -132,6 +147,20 @@ export default function App() {
   const formatTime = (time: string) =>
     dayjs(`${selectedDate}T${time}`).format('hh:mm:ss A');
 
+  const isClockedIn = !!clockIn;
+
+  const getExportButtonClasses = (): string => {
+    if (breaks.length === 0) {
+      return 'bg-gray-400 cursor-not-allowed text-gray-700';
+    }
+
+    return darkMode
+      ? 'bg-green-600 text-white hover:bg-green-700'
+      : 'bg-green-500 text-white hover:bg-green-600';
+  };
+
+  const exportButtonClass = `px-4 py-2 rounded cursor-pointer ${getExportButtonClasses()}`;
+
   return (
     <div
       className={`min-h-screen p-4 ${
@@ -146,13 +175,7 @@ export default function App() {
             <button
               onClick={exportCSV}
               disabled={breaks.length === 0}
-              className={`px-4 py-2 rounded cursor-pointer ${
-                breaks.length === 0
-                  ? 'bg-gray-400 cursor-not-allowed text-gray-700'
-                  : darkMode
-                  ? 'bg-green-600 text-white hover:bg-green-700'
-                  : 'bg-green-500 text-white hover:bg-green-600'
-              }`}
+              className={exportButtonClass}
             >
               📦 Export CSV
             </button>
@@ -166,66 +189,107 @@ export default function App() {
             >
               {darkMode ? '🌞 Light' : '🌙 Dark'}
             </button>
+            <button
+              onClick={() => handleReset()}
+              className={`px-4 py-2 rounded cursor-pointer self-end ${
+                darkMode
+                  ? 'bg-red-600 text-white hover:bg-red-700'
+                  : 'bg-red-500 text-white hover:bg-red-600'
+              }`}
+            >
+              🔄 Reset
+            </button>
           </div>
         </div>
 
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <input
-            type="time"
-            step="1"
-            value={clockIn}
-            onChange={(e) => setClockIn(e.target.value)}
-            className={`p-2 border rounded ${
-              darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
-            }`}
-            placeholder="Clock In"
-          />
-          <input
-            type="number"
-            min={1}
-            value={shiftLength}
-            onChange={(e) => setShiftLength(Number(e.target.value))}
-            className={`p-2 border rounded ${
-              darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
-            }`}
-            placeholder="Shift Length (hrs)"
-          />
-          <button
-            onClick={handleReset}
-            className={`px-4 py-2 rounded cursor-pointer ${
-              darkMode
-                ? 'bg-red-600 text-white hover:bg-red-700'
-                : 'bg-red-500 text-white hover:bg-red-600'
-            }`}
-          >
-            🔄 Reset
-          </button>
+          <div className="flex flex-col">
+            <label htmlFor="Clock In Time" className="text-sm mb-1">
+              Clock In Time
+            </label>
+            <input
+              type="time"
+              step="1"
+              value={clockIn ? dayjs(clockIn).format('HH:mm:ss') : ''}
+              onChange={(e) => {
+                const newTime = e.target.value;
+                if (newTime) {
+                  const newDateTime = dayjs(
+                    `${selectedDate}T${newTime}`
+                  ).toISOString();
+                  setClockIn(newDateTime);
+                } else {
+                  setClockIn('');
+                }
+              }}
+              className={`p-2 border rounded ${
+                darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
+              }`}
+            />
+          </div>
+
+          <div className="grid gap-4">
+            {' '}
+            <button
+              onClick={handleClockToggle}
+              className={`px-4 py-2 rounded self-end ${
+                isClockedIn
+                  ? 'bg-red-600 hover:bg-red-700'
+                  : 'bg-green-600 hover:bg-green-700'
+              }`}
+            >
+              {isClockedIn ? '🛑 Clock Out' : '✅ Clock In'}
+            </button>
+          </div>
+          <div className="flex flex-col">
+            <label htmlFor="Shift Length (hrs)" className="text-sm mb-1">
+              Shift Length (hrs)
+            </label>
+            <input
+              type="number"
+              min={1}
+              value={shiftLength}
+              onChange={(e) => setShiftLength(Number(e.target.value))}
+              className={`p-2 border rounded ${
+                darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
+              }`}
+              placeholder="Enter shift hours"
+            />
+          </div>
         </div>
 
         <div className="grid sm:grid-cols-3 gap-4">
-          <input
-            type="time"
-            step="1"
-            value={breakStart}
-            onChange={(e) => setBreakStart(e.target.value)}
-            className={`p-2 border rounded ${
-              darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
-            }`}
-            placeholder="Break Start"
-          />
-          <input
-            type="time"
-            step="1"
-            value={breakEnd}
-            onChange={(e) => setBreakEnd(e.target.value)}
-            className={`p-2 border rounded ${
-              darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
-            }`}
-            placeholder="Break End"
-          />
+          <div className="flex flex-col">
+            <label htmlFor="Break Start" className="text-sm mb-1">
+              Break Start
+            </label>
+            <input
+              type="time"
+              step="1"
+              value={breakStart}
+              onChange={(e) => setBreakStart(e.target.value)}
+              className={`p-2 border rounded ${
+                darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
+              }`}
+            />
+          </div>
+          <div className="flex flex-col">
+            <label htmlFor="Break End" className="text-sm mb-1">
+              Break End
+            </label>
+            <input
+              type="time"
+              step="1"
+              value={breakEnd}
+              onChange={(e) => setBreakEnd(e.target.value)}
+              className={`p-2 border rounded ${
+                darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
+              }`}
+            />
+          </div>
           <button
             onClick={handleAddBreak}
-            className={`px-4 py-2 rounded cursor-pointer ${
+            className={`px-4 py-2 rounded self-end cursor-pointer ${
               darkMode
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-blue-500 text-white hover:bg-blue-600'
@@ -287,20 +351,7 @@ export default function App() {
                   onClick={() => handleDeleteBreak(b.id)}
                   className="cursor-pointer text-red-500 hover:text-red-700"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  ❌
                 </button>
               </li>
             ))}
