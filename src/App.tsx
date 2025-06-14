@@ -3,14 +3,11 @@ import toast, { Toaster } from 'react-hot-toast';
 import dayjs from 'dayjs';
 import Papa from 'papaparse';
 
-/**
- * Break interface
- */
 interface BreakEntry {
   id: number;
   start: string;
   end: string;
-  duration?: number; // minutes
+  duration?: number;
   date: string;
 }
 
@@ -20,10 +17,8 @@ export default function App() {
   const [breaks, setBreaks] = useState<BreakEntry[]>([]);
   const [breakStart, setBreakStart] = useState('');
   const [breakEnd, setBreakEnd] = useState('');
-  const [selectedDate, setSelectedDate] = useState(
-    dayjs().format('YYYY-MM-DD')
-  );
   const [darkMode, setDarkMode] = useState(true);
+  const selectedDate = dayjs().format('YYYY-MM-DD');
   const hasShownRestoreToast = useRef(false);
 
   useEffect(() => {
@@ -33,7 +28,6 @@ export default function App() {
       setClockIn(parsed.clockIn || '');
       setShiftLength(parsed.shiftLength || 9);
       setBreaks(parsed.breaks || []);
-      setSelectedDate(parsed.selectedDate || dayjs().format('YYYY-MM-DD'));
       setDarkMode(parsed.darkMode ?? true);
       toast.success('🔁 Data restored');
       hasShownRestoreToast.current = true;
@@ -43,9 +37,9 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(
       'work-tracker',
-      JSON.stringify({ clockIn, shiftLength, breaks, selectedDate, darkMode })
+      JSON.stringify({ clockIn, shiftLength, breaks, darkMode })
     );
-  }, [clockIn, shiftLength, breaks, selectedDate, darkMode]);
+  }, [clockIn, shiftLength, breaks, darkMode]);
 
   const handleAddBreak = () => {
     if (!breakStart || !breakEnd) {
@@ -79,21 +73,41 @@ export default function App() {
     toast.success('🗑 Break deleted');
   };
 
-  const getWorkedMinutes = () => {
+  const handleReset = () => {
+    setClockIn('');
+    setBreaks([]);
+    setBreakStart('');
+    setBreakEnd('');
+    toast.success('🔁 Reset complete');
+  };
+
+  const getGrossMinutes = () => {
     if (!clockIn) return 0;
     const start = dayjs(`${selectedDate}T${clockIn}`);
     const now = dayjs();
-    const totalBreak = breaks.reduce((acc, b) => acc + (b.duration || 0), 0);
-    return Math.max(0, now.diff(start, 'minute') - totalBreak);
+    return Math.max(0, now.diff(start, 'minute'));
   };
 
+  const getWorkedMinutes = () => {
+    const gross = getGrossMinutes();
+    const totalBreak = breaks
+      .filter((b) => b.date === selectedDate)
+      .reduce((acc, b) => acc + (b.duration || 0), 0);
+    const lunchBreak = 60; // fixed 1 hour lunch
+    return Math.max(0, gross - totalBreak - lunchBreak);
+  };
+
+  const gross = getGrossMinutes();
   const worked = getWorkedMinutes();
   const shiftMinutes = shiftLength * 60;
-  const remaining = Math.max(0, shiftMinutes - worked);
+  const remaining = worked < shiftMinutes ? shiftMinutes - worked : 0;
   const overtime = worked > shiftMinutes ? worked - shiftMinutes : 0;
+
   const expectedEnd = clockIn
     ? dayjs(`${selectedDate}T${clockIn}`).add(
-        shiftMinutes + breaks.reduce((acc, b) => acc + (b.duration || 0), 0),
+        shiftMinutes +
+          breaks.reduce((acc, b) => acc + (b.duration || 0), 0) +
+          60, // + 60 mins lunch
         'minute'
       )
     : null;
@@ -125,16 +139,14 @@ export default function App() {
       }`}
     >
       <Toaster />
-
-      <div className="max-w-6xl mx-auto flex flex-col gap-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div className="max-w-4xl mx-auto flex flex-col gap-6">
+        <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">🕒 Work Timer</h1>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
-              onClick={() => exportCSV()}
+              onClick={exportCSV}
               disabled={breaks.length === 0}
-              className={`px-4 py-2 rounded cursor-pointer whitespace-nowrap ${
+              className={`px-4 py-2 rounded cursor-pointer ${
                 breaks.length === 0
                   ? 'bg-gray-400 cursor-not-allowed text-gray-700'
                   : darkMode
@@ -146,75 +158,74 @@ export default function App() {
             </button>
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className={`px-4 py-2 rounded cursor-pointer whitespace-nowrap ${
+              className={`px-4 py-2 rounded cursor-pointer ${
                 darkMode
                   ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-500'
                   : 'bg-gray-800 text-white hover:bg-gray-900'
               }`}
-              aria-label="Toggle Dark Mode"
             >
               {darkMode ? '🌞 Light' : '🌙 Dark'}
             </button>
           </div>
         </div>
 
-        {/* Inputs */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className={`p-2 border rounded w-full ${
-              darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
-            }`}
-          />
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
           <input
             type="time"
             step="1"
             value={clockIn}
             onChange={(e) => setClockIn(e.target.value)}
-            placeholder="Clock-in Time"
-            className={`p-2 border rounded w-full ${
+            className={`p-2 border rounded ${
               darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
             }`}
+            placeholder="Clock In"
           />
           <input
             type="number"
             min={1}
             value={shiftLength}
             onChange={(e) => setShiftLength(Number(e.target.value))}
-            placeholder="Shift Length (hrs)"
-            className={`p-2 border rounded w-full ${
+            className={`p-2 border rounded ${
               darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
             }`}
+            placeholder="Shift Length (hrs)"
           />
+          <button
+            onClick={handleReset}
+            className={`px-4 py-2 rounded cursor-pointer ${
+              darkMode
+                ? 'bg-red-600 text-white hover:bg-red-700'
+                : 'bg-red-500 text-white hover:bg-red-600'
+            }`}
+          >
+            🔄 Reset
+          </button>
         </div>
 
-        {/* Add Break */}
         <div className="grid sm:grid-cols-3 gap-4">
           <input
             type="time"
             step="1"
             value={breakStart}
             onChange={(e) => setBreakStart(e.target.value)}
-            placeholder="Break Start"
-            className={`p-2 border rounded w-full ${
+            className={`p-2 border rounded ${
               darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
             }`}
+            placeholder="Break Start"
           />
           <input
             type="time"
             step="1"
             value={breakEnd}
             onChange={(e) => setBreakEnd(e.target.value)}
-            placeholder="Break End"
-            className={`p-2 border rounded w-full ${
+            className={`p-2 border rounded ${
               darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
             }`}
+            placeholder="Break End"
           />
           <button
             onClick={handleAddBreak}
-            className={`px-4 py-2 rounded cursor-pointer w-full ${
+            className={`px-4 py-2 rounded cursor-pointer ${
               darkMode
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-blue-500 text-white hover:bg-blue-600'
@@ -224,13 +235,18 @@ export default function App() {
           </button>
         </div>
 
-        {/* Summary */}
         <div
           className={`p-4 rounded ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}
         >
           <h2 className="text-xl font-semibold mb-2">📋 Summary</h2>
           <p>
-            🕐 Worked:{' '}
+            🧱 Gross Hours:{' '}
+            <strong>
+              {Math.floor(gross / 60)}h {gross % 60}m
+            </strong>
+          </p>
+          <p>
+            ✅ Effective Hours:{' '}
             <strong>
               {Math.floor(worked / 60)}h {worked % 60}m
             </strong>
@@ -255,7 +271,6 @@ export default function App() {
           </p>
         </div>
 
-        {/* Break List */}
         <div
           className={`p-4 rounded ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}
         >
@@ -271,8 +286,6 @@ export default function App() {
                 <button
                   onClick={() => handleDeleteBreak(b.id)}
                   className="cursor-pointer text-red-500 hover:text-red-700"
-                  aria-label="Delete break"
-                  title="Delete break"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
