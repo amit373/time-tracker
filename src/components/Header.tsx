@@ -58,7 +58,7 @@ function Header({
           disabled={breaks.length === 0}
           className={`${exportButtonClass} text-base sm:text-base flex-1 sm:flex-initial min-h-[44px]`}
         >
-          📦 Export CSV
+          📦 Export
         </button>
         <button
           onClick={toggleDarkMode}

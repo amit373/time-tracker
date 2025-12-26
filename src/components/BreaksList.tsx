@@ -49,10 +49,32 @@ function BreaksList({
       className={`p-4 rounded ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}
     >
       <h2 className="text-xl sm:text-2xl font-semibold mb-3">☕ Breaks</h2>
-      {breaksForDate.length === 0 && (
-        <p className="text-base sm:text-lg">No breaks recorded</p>
-      )}
-      <ul className="space-y-3">
+      {breaksForDate.length === 0 ? (
+        <div
+          className={`flex flex-col items-center justify-center py-8 px-4 rounded-lg border-2 border-dashed ${
+            darkMode
+              ? 'border-gray-600 bg-gray-700/30'
+              : 'border-gray-300 bg-gray-50'
+          }`}
+        >
+          <div className="text-5xl mb-3 opacity-60">☕</div>
+          <p
+            className={`text-base sm:text-lg font-medium ${
+              darkMode ? 'text-gray-400' : 'text-gray-600'
+            }`}
+          >
+            No breaks recorded yet
+          </p>
+          <p
+            className={`text-sm sm:text-base mt-1 ${
+              darkMode ? 'text-gray-500' : 'text-gray-500'
+            }`}
+          >
+            Add your first break above
+          </p>
+        </div>
+      ) : (
+        <ul className="space-y-3">
         {breaksForDate.map((b) => (
           <li
             key={b.id}
@@ -124,7 +146,8 @@ function BreaksList({
             )}
           </li>
         ))}
-      </ul>
+        </ul>
+      )}
     </div>
   );
 }
