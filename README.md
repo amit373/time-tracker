@@ -1,54 +1,111 @@
-# React + TypeScript + Vite
+# 🕒 Work Timer - Time Tracking Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, feature-rich time tracking application built with React, TypeScript, and Vite. Track your work hours, manage breaks, and monitor your shift progress in real-time.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### ⏰ Time Tracking
+- **Clock In/Out**: One-click clock in/out toggle with automatic timestamp recording
+- **Manual Time Entry**: Manually set clock in and clock out times with time picker inputs
+- **Real-time Tracking**: Live updates of your work hours as you clock in and out
 
-## Expanding the ESLint configuration
+### ☕ Break Management
+- **Add Breaks**: Record break start and end times with automatic duration calculation
+- **Edit Breaks**: Modify existing break entries with inline editing
+- **Delete Breaks**: Remove breaks from your record
+- **Break List**: View all breaks for the current day in chronological order
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 📊 Time Calculations & Summary
+- **Gross Hours**: Total time from clock in to clock out (including breaks)
+- **Effective Hours**: Actual worked time (gross hours minus break time)
+- **Remaining Time**: Time left to complete your scheduled shift
+- **Overtime Tracking**: Automatically calculates overtime hours when you exceed your shift length
+- **Expected End Time**: Calculates when you'll finish your shift based on clock in time, shift length, and total break time
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### ⚙️ Configuration
+- **Customizable Shift Length**: Set your shift duration in hours (default: 9 hours)
+- **Date Selection**: Track time for the current date
+
+### 💾 Data Management
+- **LocalStorage Persistence**: Automatically saves your data to browser localStorage
+- **Data Restoration**: Automatically restores your previous session on page load
+- **CSV Export**: Export your break data to CSV format for record keeping
+- **Reset Function**: Clear all clock times and breaks with a single click
+
+### 🎨 User Experience
+- **Dark Mode**: Toggle between light and dark themes for comfortable viewing
+- **Responsive Design**: Fully responsive layout that works on desktop, tablet, and mobile devices
+- **Toast Notifications**: Visual feedback for all actions (clock in/out, add/edit/delete breaks, reset, etc.)
+- **Intuitive UI**: Clean, modern interface with color-coded metrics
+
+### 🔧 Technical Features
+- Built with **React 19** and **TypeScript** for type safety
+- **Vite** for fast development and optimized builds
+- **Tailwind CSS** for modern, responsive styling
+- **Day.js** for date and time manipulation
+- **React Hot Toast** for user notifications
+- **PapaParse** for CSV export functionality
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/amit373/time-tracker
+cd time-tracker
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+2. Install dependencies:
+```bash
+npm install
 ```
+
+3. Start the development server:
+```bash
+npm run dev
+```
+
+4. Open your browser and navigate to `http://localhost:5173`
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+The built files will be in the `dist` directory.
+
+### Preview Production Build
+
+```bash
+npm run preview
+```
+
+## 📝 Usage
+
+1. **Clock In**: Click the "✅ Clock In" button or manually set your clock in time
+2. **Set Shift Length**: Enter your expected shift duration in hours
+3. **Add Breaks**: Enter break start and end times, then click to add
+4. **Monitor Progress**: View your summary metrics in real-time
+5. **Clock Out**: Click "🛑 Clock Out" when finished or manually set clock out time
+6. **Export Data**: Click "📦 Export" to download your break data as CSV
+7. **Reset**: Click "🔄 Reset" to clear all data and start fresh
+
+## 🛠️ Tech Stack
+
+- **React 19** - UI library
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **Tailwind CSS** - Styling
+- **Day.js** - Date/time utilities
+- **React Hot Toast** - Notifications
+- **PapaParse** - CSV export
+
+## 📄 License
+
+This project is private and proprietary.
