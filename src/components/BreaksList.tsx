@@ -65,7 +65,7 @@ function BreaksList({
                   step="1"
                   value={editBreakStart}
                   onChange={(e) => onEditBreakStartChange(e.target.value)}
-                  className={`p-2 border rounded text-base flex-1 ${
+                  className={`w-full p-3 border rounded text-base min-h-[44px] ${
                     darkMode
                       ? 'bg-gray-700 text-white border-gray-600'
                       : 'bg-white text-gray-900 border-gray-300'
@@ -77,7 +77,7 @@ function BreaksList({
                   step="1"
                   value={editBreakEnd}
                   onChange={(e) => onEditBreakEndChange(e.target.value)}
-                  className={`p-2 border rounded text-base flex-1 ${
+                  className={`w-full p-3 border rounded text-base min-h-[44px] ${
                     darkMode
                       ? 'bg-gray-700 text-white border-gray-600'
                       : 'bg-white text-gray-900 border-gray-300'

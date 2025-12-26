@@ -28,7 +28,7 @@ function BreakInput({
           step="1"
           value={breakStart}
           onChange={(e) => onBreakStartChange(e.target.value)}
-          className={`p-3 border rounded text-base min-h-[44px] ${
+          className={`w-full p-3 border rounded text-base min-h-[44px] ${
             darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
           }`}
         />
@@ -42,7 +42,7 @@ function BreakInput({
           step="1"
           value={breakEnd}
           onChange={(e) => onBreakEndChange(e.target.value)}
-          className={`p-3 border rounded text-base min-h-[44px] ${
+          className={`w-full p-3 border rounded text-base min-h-[44px] ${
             darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
           }`}
         />
@@ -50,7 +50,7 @@ function BreakInput({
       <div className="flex flex-col sm:justify-end">
         <button
           onClick={onAddBreak}
-          className={`px-4 py-3 rounded cursor-pointer text-base font-medium min-h-[44px] ${
+          className={`w-full px-4 py-3 rounded cursor-pointer text-base font-medium min-h-[44px] ${
             darkMode
               ? 'bg-blue-600 text-white hover:bg-blue-700'
               : 'bg-blue-500 text-white hover:bg-blue-600'

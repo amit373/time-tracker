@@ -47,7 +47,7 @@ function ClockControls({
               onClockInChange('');
             }
           }}
-          className={`p-3 border rounded text-base min-h-[44px] ${
+          className={`w-full p-3 border rounded text-base min-h-[44px] ${
             darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
           }`}
         />
@@ -71,7 +71,7 @@ function ClockControls({
               onClockOutChange('');
             }
           }}
-          className={`p-3 border rounded text-base min-h-[44px] ${
+          className={`w-full p-3 border rounded text-base min-h-[44px] ${
             darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
           }`}
         />
@@ -79,7 +79,7 @@ function ClockControls({
       <div className="flex flex-col sm:justify-end">
         <button
           onClick={onClockToggle}
-          className={`px-4 py-3 rounded text-base font-medium min-h-[44px] ${
+          className={`w-full px-4 py-3 rounded text-base font-medium min-h-[44px] ${
             isClockedIn
               ? 'bg-red-600 hover:bg-red-700 text-white'
               : 'bg-green-600 hover:bg-green-700 text-white'
@@ -97,7 +97,7 @@ function ClockControls({
           min={1}
           value={shiftLength}
           onChange={(e) => onShiftLengthChange(Number(e.target.value))}
-          className={`p-3 border rounded text-base min-h-[44px] ${
+          className={`w-full p-3 border rounded text-base min-h-[44px] ${
             darkMode ? 'bg-gray-700 text-white border-gray-600' : ''
           }`}
           placeholder="Enter shift hours"
